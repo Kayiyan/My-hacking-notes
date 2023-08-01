@@ -1,0 +1,1 @@
+ssti vulnarable --> try on burpsuite to catch that , we can use payloadallthethings or hacktricks book to exploit this easy SSTI vuln on this challenge.

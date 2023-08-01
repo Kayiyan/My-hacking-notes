@@ -1,0 +1,4 @@
+use dnSpy debug the program ( break point 4 and 39)
+
+step over by step (F10) to see the flag 
+HTB{SuP3rC00lFL4g}

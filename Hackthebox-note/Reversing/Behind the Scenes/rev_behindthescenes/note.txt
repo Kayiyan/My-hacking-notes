@@ -1,0 +1,5 @@
+run file to check 
+
+strings to find the strings execute -> ltrace to see what that strings call from
+
+--> open hexeditor to search --> flag HTB{Itz_0nLy_UD2}
