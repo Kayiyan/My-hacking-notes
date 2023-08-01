@@ -1,0 +1,30 @@
+nmap scanning : port open : 22,80,9091
+
+9091 might special , let's try a bit search about this port.
+
+scan from gobuster we got /tiny is ok
+
+search H3k on this . we can rce on it.
+
+get the file revershell php then upload to the web , execute it (need listen on shell too)
+
+in the etc/ngix/sites-enabled/ we find new maybe a sube domain let check that : soc-player.htb
+
+player
+PlayerOftheMatch2022 
+-> got user.txt
+
+upload linpeas.sh to see some note file might important 
+
+there is a file we can writable.
+
+this is cool :
+
+Interesting GROUP writable files (not in Home) (max 500)
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#writable-files                                                                                    
+  Group player:                                                                                                                                                      
+/usr/local/share/dstat                   
+
+try search dstat on gtfo bins to find exploit this.
+
+and got the root.

