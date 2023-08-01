@@ -1,0 +1,44 @@
+nmap -p 445 --script=smb-enum-shares.nse,smb-enum-users.nse 10.10.41.255
+
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-04-13 04:03 EDT
+Stats: 0:00:49 elapsed; 0 hosts completed (1 up), 1 undergoing Script Scan
+NSE Timing: About 50.00% done; ETC: 04:04 (0:00:36 remaining)
+Stats: 0:00:50 elapsed; 0 hosts completed (1 up), 1 undergoing Script Scan
+NSE Timing: About 50.00% done; ETC: 04:04 (0:00:38 remaining)
+Stats: 0:00:53 elapsed; 0 hosts completed (1 up), 1 undergoing Script Scan
+NSE Timing: About 50.00% done; ETC: 04:04 (0:00:40 remaining)
+Nmap scan report for 10.10.41.255
+Host is up (0.26s latency).
+
+PORT    STATE SERVICE
+445/tcp open  microsoft-ds
+
+Host script results:
+| smb-enum-shares: 
+|   account_used: guest
+|   \\10.10.41.255\IPC$: 
+|     Type: STYPE_IPC_HIDDEN
+|     Comment: IPC Service (kenobi server (Samba, Ubuntu))
+|     Users: 1
+|     Max Users: <unlimited>
+|     Path: C:\tmp
+|     Anonymous access: READ/WRITE
+|     Current user access: READ/WRITE
+|   \\10.10.41.255\anonymous: 
+|     Type: STYPE_DISKTREE
+|     Comment: 
+|     Users: 0
+|     Max Users: <unlimited>
+|     Path: C:\home\kenobi\share
+|     Anonymous access: READ/WRITE
+|     Current user access: READ/WRITE
+|   \\10.10.41.255\print$: 
+|     Type: STYPE_DISKTREE
+|     Comment: Printer Drivers
+|     Users: 0
+|     Max Users: <unlimited>
+|     Path: C:\var\lib\samba\printers
+|     Anonymous access: <none>
+|_    Current user access: <none>
+
+Nmap done: 1 IP address (1 host up) scanned in 53.44 seconds

@@ -1,0 +1,41 @@
+nmap 10.10.41.255 -vvv   
+          
+Starting Nmap 7.93 ( https://nmap.org ) at 2023-04-13 03:59 EDT
+Initiating Ping Scan at 03:59
+Scanning 10.10.41.255 [2 ports]
+Completed Ping Scan at 03:59, 0.25s elapsed (1 total hosts)
+Initiating Parallel DNS resolution of 1 host. at 03:59
+Stats: 0:00:08 elapsed; 0 hosts completed (0 up), 1 undergoing Ping Scan
+Parallel DNS resolution of 1 host. Timing: About 0.00% done
+Stats: 0:00:11 elapsed; 0 hosts completed (0 up), 1 undergoing Ping Scan
+Parallel DNS resolution of 1 host. Timing: About 0.00% done
+Completed Parallel DNS resolution of 1 host. at 03:59, 13.00s elapsed
+DNS resolution of 1 IPs took 13.00s. Mode: Async [#: 1, OK: 0, NX: 0, DR: 1, SF: 0, TR: 3, CN: 0]
+Initiating Connect Scan at 03:59
+Scanning 10.10.41.255 [1000 ports]
+Discovered open port 21/tcp on 10.10.41.255
+Discovered open port 139/tcp on 10.10.41.255
+Discovered open port 22/tcp on 10.10.41.255
+Discovered open port 111/tcp on 10.10.41.255
+Discovered open port 445/tcp on 10.10.41.255
+Discovered open port 80/tcp on 10.10.41.255
+Increasing send delay for 10.10.41.255 from 0 to 5 due to 76 out of 253 dropped probes since last increase.
+Increasing send delay for 10.10.41.255 from 5 to 10 due to max_successful_tryno increase to 4
+Discovered open port 2049/tcp on 10.10.41.255
+Completed Connect Scan at 04:00, 41.32s elapsed (1000 total ports)
+Nmap scan report for 10.10.41.255
+Host is up, received syn-ack (0.24s latency).
+Scanned at 2023-04-13 03:59:25 EDT for 41s
+Not shown: 993 closed tcp ports (conn-refused)
+PORT     STATE SERVICE      REASON
+21/tcp   open  ftp          syn-ack
+22/tcp   open  ssh          syn-ack
+80/tcp   open  http         syn-ack
+111/tcp  open  rpcbind      syn-ack
+139/tcp  open  netbios-ssn  syn-ack
+445/tcp  open  microsoft-ds syn-ack
+2049/tcp open  nfs          syn-ack
+
+Read data files from: /usr/bin/../share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 54.61 seconds
+
