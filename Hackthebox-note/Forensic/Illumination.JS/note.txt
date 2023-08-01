@@ -1,0 +1,5 @@
+look at the base64 in file config -> try decode.
+
+git log all the file
+
+look at some message and show git at that.
