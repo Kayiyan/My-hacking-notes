@@ -1,6 +1,7 @@
 # Tryhackme Modules note
 
-* About me :
+* My profile on THM :
+<img src="https://tryhackme-badges.s3.amazonaws.com/Kh170304.png" alt="TryHackMe">
 
-![image](https://github.com/Kayiyan/My-hacking-notes/assets/126185640/26a441a5-7644-4dc9-85bc-0e12b64b34d9)
+
 
