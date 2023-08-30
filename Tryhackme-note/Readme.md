@@ -1,8 +1,6 @@
 # Tryhackme Modules note
 
-* My profile on THM :
-<img src="https://tryhackme-badges.s3.amazonaws.com/Kh170304.png" alt="TryHackMe"> 
+* [My profile on THM](https://tryhackme.com/p/Kh170304)
 
-<img src="https://tryhackme-badges.s3.amazonaws.com/Kh170304.png" alt="TryHackMe">
 
 
