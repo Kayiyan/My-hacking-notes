@@ -1,3 +1,4 @@
+# Google CTF 2023
 from secret import config
 from Crypto.PublicKey import RSA
 from Crypto.Util.number import bytes_to_long, isPrime
