@@ -191,7 +191,7 @@ class VaultDoor4 {
 }
 ```
 
-Just take date in myBytes and change to char : I use javascript to covert that :
+Just take data in myBytes and change to char : I use javascript to covert that :
 
 ![image](https://github.com/Kayiyan/My-hacking-notes/assets/126185640/16a299d0-7f21-48ec-acec-e26a2990b498)
 
