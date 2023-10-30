@@ -257,7 +257,147 @@ decode Base64 is very easy , Javascript can help this again in fastest way :
 
 # ARMssembly 0 (arm0)
 
+Source code + explain value print out:
 
+```assembly
+	.arch armv8-a
+	.file	"chall.c"
+	.text
+	.align	2
+	.global	func1
+	.type	func1, %function
+func1:
+	sub	sp, sp, #16
+	str	w0, [sp, 12]   // store w0 -> stack + 12
+	str	w1, [sp, 8]   // store w1 -> stack + 8
+	ldr	w1, [sp, 12]  // load w1 -> stack + 12
+	ldr	w0, [sp, 8]  // load wo -> stack + 8
+	cmp	w1, w0    // cmp w1 and w0  (4004594377 and 4110761777)
+	bls	.L2     // same wiht jump in x86 , this will branch (jump) if lower or equal 
+	ldr	w0, [sp, 12]
+	b	.L3
+.L2:
+	ldr	w0, [sp, 8]  // load w0 -> stack + 8
+.L3:
+	add	sp, sp, 16
+	ret
+	.size	func1, .-func1
+	.section	.rodata
+	.align	3
+.LC0:
+	.string	"Result: %ld\n"
+	.text
+	.align	2
+	.global	main
+	.type	main, %function
+main:
+	stp	x29, x30, [sp, -48]!
+	add	x29, sp, 0
+	str	x19, [sp, 16]
+	str	w0, [x29, 44]
+	str	x1, [x29, 32]
+	ldr	x0, [x29, 32]
+	add	x0, x0, 8
+	ldr	x0, [x0]
+	bl	atoi
+	mov	w19, w0
+	ldr	x0, [x29, 32]
+	add	x0, x0, 16
+	ldr	x0, [x0]
+	bl	atoi
+	mov	w1, w0
+	mov	w0, w19
+	bl	func1   // note this -> call the func1
+	mov	w1, w0  // move w1 -> w0
+	adrp	x0, .LC0
+	add	x0, x0, :lo12:.LC0
+	bl	printf -> so the result will be w1 -> which is 4110761777 -> and turn to hex is 0xf5053f31 
+	mov	w0, 0
+	ldr	x19, [sp, 16]
+	ldp	x29, x30, [sp], 48
+	ret
+	.size	main, .-main
+	.ident	"GCC: (Ubuntu/Linaro 7.5.0-3ubuntu1~18.04) 7.5.0"
+	.section	.note.GNU-stack,"",@progbits
+```
+
+*  ARMssembly 1 (arm0)
+
+Source code + explain value print out :
+
+```assembly
+	.arch armv8-a
+	.file	"chall_1.c"
+	.text
+	.align	2
+	.global	func
+	.type	func, %function
+func:
+	sub	sp, sp, #32
+	str	w0, [sp, 12]    // store w0 -> stack + 12 (parameter store in [stack + 12])
+	mov	w0, 83          
+	str	w0, [sp, 16]    // (stack + 16)= 83
+	str	wzr, [sp, 20]  // (stack + 20) = 0
+	mov	w0, 3          
+	str	w0, [sp, 24]        // (stack + 24) = 3
+	ldr	w0, [sp, 20]       // w0 = (stack + 20) = 0
+	ldr	w1, [sp, 16]       // w1 = stack + 16 = 83
+	lsl	w0, w1, w0         //  w0 = w1 << w0 ( 83 << 0) = 83
+	str	w0, [sp, 28]       // ( stack + 28 ) = 83
+	ldr	w1, [sp, 28]       // w1 = stack + 28 = 83
+	ldr	w0, [sp, 24]      //  w0 = stack + 24 = 3
+	sdiv	w0, w1, w0    // w0 = w1 / w0 (83//3) = 27
+	str	w0, [sp, 28]      //   ( stack + 28 ) = 27
+	ldr	w1, [sp, 28]      //  w1 = (stack + 28) = 27
+	ldr	w0, [sp, 12]      //  w0 = ( stack + 12 ) 
+	sub	w0, w1, w0        // w0 = w1 - w0 = 27 - [stack + 12]
+	str	w0, [sp, 28]      //  w0 = (stack + 28)
+	ldr	w0, [sp, 28]     //  w0 = (stack + 28 ) = 0
+	add	sp, sp, 32  
+	ret
+	.size	func, .-func
+	.section	.rodata
+	.align	3
+.LC0:
+	.string	"You win!"
+	.align	3
+.LC1:
+	.string	"You Lose :("
+	.text
+	.align	2
+	.global	main
+	.type	main, %function
+main:
+	stp	x29, x30, [sp, -48]!
+	add	x29, sp, 0
+	str	w0, [x29, 28]
+	str	x1, [x29, 16]
+	ldr	x0, [x29, 16]
+	add	x0, x0, 8
+	ldr	x0, [x0]
+	bl	atoi
+	str	w0, [x29, 44]
+	ldr	w0, [x29, 44]
+	bl	func  -> call the func 
+	cmp	w0, 0  -> compare w0 to 0
+	bne	.L4   // branch if not equal --> [stack + 12 ] = 27 -> 0x0000001b
+	adrp	x0, .LC0
+	add	x0, x0, :lo12:.LC0
+	bl	puts
+	b	.L6
+.L4:
+	adrp	x0, .LC1
+	add	x0, x0, :lo12:.LC1
+	bl	puts
+.L6:
+	nop
+	ldp	x29, x30, [sp], 48
+	ret
+	.size	main, .-main
+	.ident	"GCC: (Ubuntu/Linaro 7.5.0-3ubuntu1~18.04) 7.5.0"
+	.section	.note.GNU-stack,"",@progbits
+
+```
 
 
 
