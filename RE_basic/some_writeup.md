@@ -380,7 +380,7 @@ main:
 	ldr	w0, [x29, 44]
 	bl	func  -> call the func 
 	cmp	w0, 0  -> compare w0 to 0
-	bne	.L4   // branch if not equal --> [stack + 12 ] = 27 -> 0x0000001b
+	bne	.L4   // branch if not equal --> need bad value from this --> [stack + 12 ] = 27 -> 0x0000001b
 	adrp	x0, .LC0
 	add	x0, x0, :lo12:.LC0
 	bl	puts
