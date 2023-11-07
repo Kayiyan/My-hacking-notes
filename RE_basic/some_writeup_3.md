@@ -1,4 +1,4 @@
-# Pico CTF 2019
+# Pico CTF 2021
 
 # GDB Test Drive
 
