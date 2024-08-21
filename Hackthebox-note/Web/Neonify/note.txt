@@ -1,0 +1,1 @@
+pass /n will and read the flag with curl or burpsuite like :\n{functions read flag.txt}
