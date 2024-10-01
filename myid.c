@@ -22,7 +22,6 @@ void display_user_info(const char* username) {
     printf("User ID: %d\n", pw->pw_uid);
     printf("Home Directory: %s\n", pw->pw_dir);
 
-    // Lấy danh sách các nhóm của user
     getgrouplist(username, pw->pw_gid, NULL, &ngroups);
     groups = malloc(ngroups * sizeof(gid_t));
     getgrouplist(username, pw->pw_gid, groups, &ngroups);
