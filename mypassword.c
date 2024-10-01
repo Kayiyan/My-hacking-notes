@@ -8,7 +8,6 @@
 #include <crypt.h>
 #include <errno.h>
 
-// Hàm kiểm tra mật khẩu cũ
 int check_password(const char *username, const char *old_password) {
     struct spwd *spw;
     char *encrypted;
@@ -21,13 +20,12 @@ int check_password(const char *username, const char *old_password) {
 
     encrypted = crypt(old_password, spw->sp_pwdp);
     if (strcmp(encrypted, spw->sp_pwdp) == 0) {
-        return 1;  // Mật khẩu đúng
+        return 1;  
     } else {
-        return 0;  // Mật khẩu sai
+        return 0; 
     }
 }
 
-// Hàm đổi mật khẩu
 int change_password(const char *username, const char *new_password) {
     char *salt = "$6$";
     char *encrypted = crypt(new_password, salt);
@@ -37,7 +35,6 @@ int change_password(const char *username, const char *new_password) {
         return -1;
     }
 
-    // Cập nhật file /etc/shadow
     FILE *shadow_file = fopen("/etc/shadow", "r+");
     if (shadow_file == NULL) {
         perror("fopen");
@@ -50,7 +47,6 @@ int change_password(const char *username, const char *new_password) {
 
     while (fgets(buffer, sizeof(buffer), shadow_file)) {
         if (strstr(buffer, username)) {
-            // Cập nhật mật khẩu mới cho user
             spw = getspnam(username);
             if (spw != NULL) {
                 sprintf(new_shadow_line, "%s:%s:%ld::::::\n", username, encrypted, spw->sp_lstchg);
@@ -73,7 +69,6 @@ int main() {
     printf("Enter username: ");
     scanf("%s", username);
 
-    // Nhập mật khẩu cũ
     printf("Enter old password: ");
     scanf("%s", old_password);
 
